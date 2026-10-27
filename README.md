@@ -1,46 +1,73 @@
 # PowerMoat Management Tools
 
-這是一個使用 Wails + React.js + JavaScript 建立的跨平台桌面應用程式。
+這是一個以桌面產品化為目標的 Wails + React 應用程式，已具備自動備份、歷史管理、還原與刪除等完整工具流程。
+
+## 產品定位
+
+- 目標：做成可發佈、可部署的桌面工具
+- 架構：Wails + Go + React + Vite
+- 風格：原生桌面感、簡潔設定頁、明確操作流程
+- 現況：已具備核心備份與設定管理功能，適合進一步包裝成正式發行版本
 
 ## 技術棧
 
-- **後端**: Go (使用 Wails v2.12.0 框架)
-- **前端**: React 18 + Vite
-- **語言**: JavaScript (前端)、Go (後端)
-- **平台**: Windows、macOS、Linux
+- 後端：Go + Wails v2
+- 前端：React 18 + Vite
+- 平台：Windows / macOS / Linux
+- 產出：可進行桌面應用打包與發行
 
-## 項目結構
+## 功能總覽
 
-```
+- ✅ 自動備份排程
+- ✅ 手動立即備份
+- ✅ 備份資料夾設定
+- ✅ 保留份數管理
+- ✅ 備份歷史列表
+- ✅ 還原備份
+- ✅ 刪除舊備份
+- ✅ 開啟備份資料夾
+- ✅ 桌面化導覽與設定頁面
+
+## 專案結構
+
+```text
 powermoat_app_tools/
-├── main.go              # 應用程式主入口
-├── app.go               # 應用程式邏輯和 Go 方法
-├── go.mod               # Go 模組依賴
-├── wails.json           # Wails 配置文件
-├── frontend/            # React 前端應用
+├── app.go              # Wails 使用的 App 邏輯
+├── main.go             # 程式入口
+├── go.mod              # Go 模組配置
+├── wails.json          # Wails 發行設定
+├── config/             # 設定與備份邏輯
+│   ├── backup.go
+│   ├── service.go
+│   ├── models.go
+│   └── backup_test.go
+├── frontend/
 │   ├── src/
-│   │   ├── App.jsx      # 主應用組件
-│   │   ├── main.jsx     # React 入口點
-│   │   ├── App.css      # 應用樣式
-│   │   ├── style.css    # 全局樣式
-│   │   └── assets/      # 靜態資源
-│   ├── wailsjs/         # Wails 生成的 JS 綁定
-│   ├── package.json     # npm 依賴
-│   ├── vite.config.js   # Vite 配置
-│   └── index.html       # HTML 模板
-└── .github/
-    └── copilot-instructions.md  # Copilot 指引
+│   │   ├── App.jsx
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── style.css
+│   ├── wailsjs/
+│   ├── package.json
+│   ├── vite.config.js
+│   └── index.html
+├── docs/
+│   └── ...
+├── build/
+│   └── bin/
+└── README.md
 ```
 
-## 先決條件
+## 環境需求
 
-- Go 1.21 或更高版本
-- Node.js 16 或更高版本
-- npm 或 yarn
+- Go 1.21+
+- Node.js 18+
+- npm
 
-### Linux 需求
+### Linux 依賴（若要在 Linux 編譯）
+
 ```bash
-# Ubuntu/Debian
+# Ubuntu / Debian
 sudo apt-get install build-essential libgtk-3-dev libwebkit2gtk-4.0-dev
 
 # Fedora
@@ -50,128 +77,83 @@ sudo dnf install gtk3-devel webkit2gtk3-devel
 sudo pacman -S gtk3 webkit2gtk
 ```
 
-## 安裝
+## 安裝與開發
 
-1. 克隆項目後，安裝 Wails CLI：
 ```bash
 go install github.com/wailsapp/wails/v2/cmd/wails@latest
-```
 
-2. 確保 Go bin 目錄在您的 PATH 中：
-```bash
 export PATH=$PATH:$(go env GOPATH)/bin
-```
 
-3. 安裝 Go 依賴：
-```bash
 go mod tidy
-```
-
-4. 安裝前端依賴：
-```bash
 cd frontend
 npm install
 cd ..
 ```
 
-## 開發
-
-### 使用 VS Code 任務（推薦）
-
-1. 在 VS Code 中打開項目
-2. 按 `Ctrl+Shift+P` (Windows/Linux) 或 `Cmd+Shift+P` (macOS)
-3. 選擇 "Tasks: Run Task"
-4. 選擇 "Wails Dev"
-
-### 使用命令行
+### 啟動開發模式
 
 ```bash
-# 開發模式（熱重載）
-wails dev
-
-# 或使用完整路徑
-export PATH=$PATH:$(go env GOPATH)/bin
 wails dev
 ```
 
-應用程式將在開發模式下啟動，並自動打開一個視窗。
+這會啟動熱重載桌面應用程式，方便直接測試 UI 與備份流程。
 
-## 構建
-
-### 構建生產版本
+## 生產打包
 
 ```bash
 wails build
 ```
 
-構建產物將在 `build/bin` 目錄中。
+輸出將會位於：
 
-### 針對不同平台構建
+```text
+build/bin/
+```
+
+### 進階平台打包
 
 ```bash
-# Linux
-wails build -platform linux/amd64 -tags webkit2_41
-
-# Windows (從 Linux/Mac)
+# Windows
 wails build -platform windows/amd64
+
+# Linux
+wails build -platform linux/amd64
 
 # macOS
 wails build -platform darwin/universal
 ```
 
-## 功能
+## 備份功能使用方式
 
-- ✅ Go 後端與 React 前端完整集成
-- ✅ 跨平台桌面應用支援
-- ✅ 熱重載開發模式
-- ✅ Go 方法可從 JavaScript 調用
-- ✅ 原生外觀和感覺
-- ✅ 小巧的應用體積
+1. 打開設定頁面
+2. 啟用自動備份
+3. 設定每次備份的間隔
+4. 指定備份資料夾
+5. 設定保留份數
+6. 點擊 Save settings 儲存
+7. 可使用 Backup now 立即執行備份
+8. 在備份歷史中可還原或刪除舊備份
 
-## 添加新功能
+預設備份路徑：
 
-### 添加 Go 方法
-
-在 `app.go` 中添加新方法：
-
-```go
-func (a *App) YourMethod(param string) string {
-    // 您的邏輯
-    return result
-}
+```text
+%USERPROFILE%\.powermoat_app_tools\backups
 ```
 
-然後在 React 中使用：
+## 發佈準備建議
 
-```javascript
-import { YourMethod } from '../wailsjs/go/main/App';
+若要讓這個產品更接近正式發佈版本，建議補齊以下幾項：
 
-// 在組件中調用
-YourMethod("參數").then(result => {
-    console.log(result);
-});
-```
-
-### 添加 React 組件
-
-在 `frontend/src` 目錄中創建新組件：
-
-```javascript
-// frontend/src/MyComponent.jsx
-export default function MyComponent() {
-    return <div>我的組件</div>;
-}
-```
-
-## 相關資源
-
-- [Wails 文檔](https://wails.io/docs/introduction)
-- [React 文檔](https://react.dev/)
-- [Vite 文檔](https://vitejs.dev/)
+- 應用程式 icon / splash screen
+- 版本號與更新檢查流程
+- 更完整的錯誤通知與 toast
+- 程式啟動時的健康檢查
+- 針對 Windows 安裝檔封裝與簽章
+- 產品說明與使用者文件
 
 ## 授權
 
-此項目使用 MIT 授權。
+MIT
 
 ## 作者
 

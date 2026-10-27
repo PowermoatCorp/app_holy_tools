@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -36,6 +37,15 @@ type BackupService struct {
 	ticker        *time.Ticker
 	stopCh        chan struct{}
 	mu            sync.Mutex
+}
+
+// BackupFileInfo 備份檔案資訊
+// 用於前端列表顯示與還原操作。
+type BackupFileInfo struct {
+	Name      string    `json:"name"`
+	Path      string    `json:"path"`
+	Size      int64     `json:"size"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 // NewBackupService 建立備份服務
@@ -213,4 +223,132 @@ func pruneOldBackups(backupDir string, keepCount int) error {
 	}
 
 	return nil
+}
+
+// ListBackups 列出備份檔案
+func (s *BackupService) ListBackups() ([]BackupFileInfo, error) {
+	if s == nil || s.configService == nil || s.configService.GetConfig() == nil {
+		return nil, fmt.Errorf("backup service is not initialized")
+	}
+
+	backupDir := s.configService.GetConfig().Backup.Folder
+	if backupDir == "" {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			homeDir = "."
+		}
+		backupDir = filepath.Join(homeDir, ".powermoat_app_tools", "backups")
+	}
+
+	entries, err := os.ReadDir(backupDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []BackupFileInfo{}, nil
+		}
+		return nil, fmt.Errorf("failed to read backup directory: %w", err)
+	}
+
+	result := make([]BackupFileInfo, 0)
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		if !strings.HasPrefix(entry.Name(), "config-backup-") || !strings.HasSuffix(entry.Name(), ".json") {
+			continue
+		}
+
+		fullPath := filepath.Join(backupDir, entry.Name())
+		info, err := entry.Info()
+		if err != nil {
+			continue
+		}
+		result = append(result, BackupFileInfo{
+			Name:      entry.Name(),
+			Path:      fullPath,
+			Size:      info.Size(),
+			CreatedAt: info.ModTime(),
+		})
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].CreatedAt.After(result[j].CreatedAt)
+	})
+
+	return result, nil
+}
+
+// RestoreBackup 從指定備份檔還原設定
+func (s *BackupService) RestoreBackup(fileName string) error {
+	if s == nil || s.configService == nil {
+		return fmt.Errorf("backup service is not initialized")
+	}
+	if fileName == "" {
+		return fmt.Errorf("backup file name is empty")
+	}
+
+	backupDir := s.configService.GetConfig().Backup.Folder
+	if backupDir == "" {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			homeDir = "."
+		}
+		backupDir = filepath.Join(homeDir, ".powermoat_app_tools", "backups")
+	}
+
+	backupPath := filepath.Join(backupDir, fileName)
+	content, err := os.ReadFile(backupPath)
+	if err != nil {
+		return fmt.Errorf("failed to read backup file: %w", err)
+	}
+
+	var restored Config
+	if err := json.Unmarshal(content, &restored); err != nil {
+		return fmt.Errorf("failed to parse backup file: %w", err)
+	}
+
+	if err := s.configService.UpdateConfig(&restored); err != nil {
+		return fmt.Errorf("failed to restore config: %w", err)
+	}
+	return nil
+}
+
+// DeleteBackup 刪除指定備份檔
+func (s *BackupService) DeleteBackup(fileName string) error {
+	if s == nil || s.configService == nil {
+		return fmt.Errorf("backup service is not initialized")
+	}
+	if fileName == "" {
+		return fmt.Errorf("backup file name is empty")
+	}
+
+	backupDir := s.configService.GetConfig().Backup.Folder
+	if backupDir == "" {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			homeDir = "."
+		}
+		backupDir = filepath.Join(homeDir, ".powermoat_app_tools", "backups")
+	}
+
+	backupPath := filepath.Join(backupDir, fileName)
+	if err := os.Remove(backupPath); err != nil {
+		return fmt.Errorf("failed to delete backup file: %w", err)
+	}
+	return nil
+}
+
+// OpenBackupDir 開啟備份資料夾
+func (s *BackupService) OpenBackupDir() string {
+	if s == nil || s.configService == nil || s.configService.GetConfig() == nil {
+		return ""
+	}
+	backupDir := s.configService.GetConfig().Backup.Folder
+	if backupDir == "" {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			homeDir = "."
+		}
+		backupDir = filepath.Join(homeDir, ".powermoat_app_tools", "backups")
+	}
+	return backupDir
 }

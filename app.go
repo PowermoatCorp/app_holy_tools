@@ -67,6 +67,42 @@ func (a *App) RunManualBackup() *config.BackupResult {
 	return &result
 }
 
+// ListBackups 列出所有備份檔案
+func (a *App) ListBackups() []config.BackupFileInfo {
+	if a.backupService == nil {
+		a.backupService = config.NewBackupService(a.configService)
+	}
+	items, err := a.backupService.ListBackups()
+	if err != nil {
+		return nil
+	}
+	return items
+}
+
+// RestoreBackup 從備份還原設定
+func (a *App) RestoreBackup(fileName string) error {
+	if a.backupService == nil {
+		a.backupService = config.NewBackupService(a.configService)
+	}
+	return a.backupService.RestoreBackup(fileName)
+}
+
+// DeleteBackup 刪除指定備份檔案
+func (a *App) DeleteBackup(fileName string) error {
+	if a.backupService == nil {
+		a.backupService = config.NewBackupService(a.configService)
+	}
+	return a.backupService.DeleteBackup(fileName)
+}
+
+// OpenBackupDir 取得備份資料夾路徑
+func (a *App) OpenBackupDir() string {
+	if a.backupService == nil {
+		a.backupService = config.NewBackupService(a.configService)
+	}
+	return a.backupService.OpenBackupDir()
+}
+
 // TestDatabaseConnection 測試資料庫連線
 func (a *App) TestDatabaseConnection(db *config.Database) *config.ConnectionTestResult {
 	return config.TestConnection(db)
