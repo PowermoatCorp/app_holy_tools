@@ -14,6 +14,10 @@ export function SaveConfig(arg1) {
   return window['go']['main']['App']['SaveConfig'](arg1);
 }
 
+export function RunManualBackup() {
+  return window['go']['main']['App']['RunManualBackup']();
+}
+
 export function TestDatabaseConnection(arg1) {
   return window['go']['main']['App']['TestDatabaseConnection'](arg1);
 }

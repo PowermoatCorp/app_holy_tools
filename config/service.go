@@ -56,7 +56,27 @@ func (s *ConfigService) LoadConfig() error {
 		return fmt.Errorf("failed to parse config file: %w", err)
 	}
 
+	needsBackupDefaults := config.Backup.Folder == ""
+	if needsBackupDefaults {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			homeDir = "."
+		}
+		config.Backup = BackupSettings{
+			Enabled:         true,
+			IntervalMinutes: 60,
+			Folder:          filepath.Join(homeDir, ".powermoat_app_tools", "backups"),
+			KeepCount:       5,
+			LastBackup:      time.Time{},
+		}
+	}
+
 	s.config = &config
+	if needsBackupDefaults {
+		if err := s.SaveConfig(); err != nil {
+			return fmt.Errorf("failed to upgrade legacy config with backup settings: %w", err)
+		}
+	}
 	return nil
 }
 
@@ -100,6 +120,11 @@ func (s *ConfigService) UpdateConfig(config *Config) error {
 // createDefaultConfig 創建預設設定
 func (s *ConfigService) createDefaultConfig() *Config {
 	now := time.Now()
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		homeDir = "."
+	}
+
 	return &Config{
 		Version: "1.0.0",
 		Database: Database{
@@ -113,6 +138,13 @@ func (s *ConfigService) createDefaultConfig() *Config {
 		Application: Application{
 			Language: "zh-TW",
 			Theme:    "light",
+		},
+		Backup: BackupSettings{
+			Enabled:         true,
+			IntervalMinutes: 60,
+			Folder:          filepath.Join(homeDir, ".powermoat_app_tools", "backups"),
+			KeepCount:       5,
+			LastBackup:      time.Time{},
 		},
 		Metadata: Metadata{
 			CreatedAt:    now,

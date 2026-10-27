@@ -8,4 +8,6 @@ export function Greet(arg1:string):Promise<string>;
 
 export function SaveConfig(arg1:config.Config):Promise<void>;
 
+export function RunManualBackup():Promise<config.BackupResult>;
+
 export function TestDatabaseConnection(arg1:config.Database):Promise<config.ConnectionTestResult>;

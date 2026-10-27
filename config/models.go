@@ -4,10 +4,11 @@ import "time"
 
 // Config 主設定結構
 type Config struct {
-	Version     string      `json:"version"`
-	Database    Database    `json:"database"`
-	Application Application `json:"application"`
-	Metadata    Metadata    `json:"metadata"`
+	Version     string          `json:"version"`
+	Database    Database        `json:"database"`
+	Application Application     `json:"application"`
+	Backup      BackupSettings  `json:"backup"`
+	Metadata    Metadata        `json:"metadata"`
 }
 
 // Database 資料庫連線設定
