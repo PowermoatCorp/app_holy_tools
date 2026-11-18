@@ -1,2 +1,0 @@
-This folder is intentionally kept for the embedded Wails frontend bundle.
-Build the frontend before distributing a production package.
