@@ -1,1 +1,74 @@
-{}
+{
+  "language": { "label": "Interface language" },
+  "nav": {
+    "productName": "Management Suite",
+    "general": "General Settings",
+    "generalDescription": "Backup schedule and storage",
+    "advanced": "Advanced",
+    "advancedDescription": "System and protection options",
+    "about": "About",
+    "aboutDescription": "Product info and version",
+    "ready": "Ready for desktop release"
+  },
+  "about": {
+    "subtitle": "Desktop management tools ready for release",
+    "overviewTitle": "Product overview",
+    "overview": "This desktop-first application provides a native-feeling shell, reliable configuration storage, and complete backup management workflows.",
+    "statusTitle": "Current build status",
+    "statusCore": "Core backup engine: ready",
+    "statusUi": "Desktop interface: ready",
+    "statusRestore": "Restore and delete workflow: ready",
+    "statusPackaging": "Packaging metadata: ready",
+    "capabilities": "Included capabilities",
+    "features": ["Automatic backup scheduling","Manual backup on demand","Backup retention management","Restore and cleanup workflow","Desktop-first experience with Wails + React"]
+  },
+  "common": { "loading": "Loading..." },
+  "backup": {
+    "title": "Backup settings",
+    "subtitle": "Protect your configuration with scheduled, versioned backups.",
+    "enable": "Enable scheduled backups",
+    "intervalLabel": "Interval (minutes)",
+    "folderLabel": "Backup folder",
+    "keepCountLabel": "Keep backup count",
+    "lastBackupLabel": "Last backup",
+    "noBackup": "No backup yet",
+    "history": "Backup history",
+    "historyEmpty": "No backup history yet."
+  },
+  "actions": {
+    "openFolder": "Open folder",
+    "backupNow": "Backup now",
+    "backingUp": "Backing up...",
+    "browse": "Browse",
+    "save": "Save settings",
+    "saving": "Saving...",
+    "restore": "Restore",
+    "delete": "Delete"
+  },
+  "status": {
+    "loadFailed": "Failed to load settings",
+    "saved": "Settings saved",
+    "saveFailed": "Failed to save",
+    "folderPickerUnavailable": "Folder selection is unavailable in this environment. Please enter the path manually.",
+    "folderSelected": "Selected folder: ",
+    "folderNotSelected": "No folder selected",
+    "backupSuccess": "Backup succeeded: ",
+    "backupFailed": "Backup failed: ",
+    "unknownError": "Unknown error",
+    "backupFailedAction": "Manual backup failed",
+    "restored": "Restored settings from {{fileName}}",
+    "restoreFailed": "Restore failed",
+    "deleted": "Deleted {{fileName}}",
+    "deleteFailed": "Delete failed",
+    "backupFolder": "Backup folder: ",
+    "openFolderFailed": "Failed to open folder"
+  },
+  "confirm": {
+    "restore": "Restore settings from {{fileName}}?",
+    "delete": "Delete backup {{fileName}}?"
+  },
+  "advanced": {
+    "title": "Advanced settings",
+    "description": "Reserved for future operational controls, recovery policies, and system safeguards."
+  }
+}

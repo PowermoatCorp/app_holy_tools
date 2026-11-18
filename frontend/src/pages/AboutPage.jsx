@@ -1,11 +1,9 @@
+import { useTranslation } from 'react-i18next';
+
 function AboutPage() {
-  const features = [
-    'Automatic backup scheduling',
-    'Manual backup on demand',
-    'Backup retention management',
-    'Restore and cleanup workflow',
-    'Desktop-first experience with Wails + React',
-  ];
+  const { t } = useTranslation();
+
+  const features = t('about.features', { returnObjects: true });
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -16,36 +14,33 @@ function AboutPage() {
           </div>
           <div>
             <h2 className="text-2xl font-semibold text-slate-800">PowerMoat</h2>
-            <p className="text-sm text-slate-500">Release-ready desktop management tools</p>
+            <p className="text-sm text-slate-500">{t('about.subtitle')}</p>
           </div>
         </div>
       </section>
 
       <section className="grid gap-6 md:grid-cols-2">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-slate-800">Product overview</h3>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
-            This application is designed as a desktop-first management experience with a native-feeling shell,
-            a reliable configuration system, and operational backup controls for end users.
-          </p>
+          <h3 className="text-lg font-semibold text-slate-800">{t('about.overviewTitle')}</h3>
+          <p className="mt-3 text-sm leading-6 text-slate-600">{t('about.overview')}</p>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-slate-800">Current build status</h3>
+          <h3 className="text-lg font-semibold text-slate-800">{t('about.statusTitle')}</h3>
           <ul className="mt-3 space-y-2 text-sm text-slate-600">
-            <li>• Core backup engine: ready</li>
-            <li>• Reactive desktop UI: ready</li>
-            <li>• Restore and delete flow: ready</li>
-            <li>• Packaging metadata: ready</li>
+            <li>• {t('about.statusCore')}</li>
+            <li>• {t('about.statusUi')}</li>
+            <li>• {t('about.statusRestore')}</li>
+            <li>• {t('about.statusPackaging')}</li>
           </ul>
         </div>
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-slate-800">Included capabilities</h3>
+        <h3 className="text-lg font-semibold text-slate-800">{t('about.capabilities')}</h3>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {features.map((feature) => (
-            <div key={feature} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+            <div key={feature} className="h-11 flex items-center rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700">
               {feature}
             </div>
           ))}

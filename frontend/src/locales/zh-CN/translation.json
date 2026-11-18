@@ -1,1 +1,74 @@
-{}
+{
+  "language": { "label": "界面语言" },
+  "nav": {
+    "productName": "管理工具套件",
+    "general": "常规设置",
+    "generalDescription": "备份计划与存储",
+    "advanced": "高级设置",
+    "advancedDescription": "系统与保护选项",
+    "about": "关于",
+    "aboutDescription": "产品信息与版本",
+    "ready": "已可用于桌面发布"
+  },
+  "about": {
+    "subtitle": "支持桌面发布的管理工具",
+    "overviewTitle": "产品概览",
+    "overview": "本应用采用桌面优先设计，提供原生窗口体验、可靠的配置存储，以及完整的备份管理流程。",
+    "statusTitle": "当前构建状态",
+    "statusCore": "备份核心引擎：已就绪",
+    "statusUi": "桌面界面：已就绪",
+    "statusRestore": "还原与删除流程：已就绪",
+    "statusPackaging": "产品封装信息：已就绪",
+    "capabilities": "当前功能",
+    "features": ["自动备份计划","手动立即备份","备份保留份数管理","还原与清理流程","基于 Wails + React 的桌面体验"]
+  },
+  "common": { "loading": "加载中..." },
+  "backup": {
+    "title": "备份设置",
+    "subtitle": "通过定时与版本备份保护您的设置。",
+    "enable": "启用定时备份",
+    "intervalLabel": "备份间隔（分钟）",
+    "folderLabel": "备份文件夹",
+    "keepCountLabel": "保留备份份数",
+    "lastBackupLabel": "最后备份时间",
+    "noBackup": "尚未备份",
+    "history": "备份历史",
+    "historyEmpty": "尚无备份记录"
+  },
+  "actions": {
+    "openFolder": "打开文件夹",
+    "backupNow": "立即备份",
+    "backingUp": "备份中...",
+    "browse": "浏览",
+    "save": "保存设置",
+    "saving": "保存中...",
+    "restore": "还原",
+    "delete": "删除"
+  },
+  "status": {
+    "loadFailed": "加载设置失败",
+    "saved": "设置已保存",
+    "saveFailed": "保存失败",
+    "folderPickerUnavailable": "此环境不支持选择文件夹，请手动输入路径",
+    "folderSelected": "已选择文件夹：",
+    "folderNotSelected": "未选择文件夹",
+    "backupSuccess": "备份成功：",
+    "backupFailed": "备份失败：",
+    "unknownError": "未知错误",
+    "backupFailedAction": "手动备份失败",
+    "restored": "已从 {{fileName}} 还原设置",
+    "restoreFailed": "还原失败",
+    "deleted": "已删除 {{fileName}}",
+    "deleteFailed": "删除失败",
+    "backupFolder": "备份文件夹：",
+    "openFolderFailed": "打开文件夹失败"
+  },
+  "confirm": {
+    "restore": "确定要从 {{fileName}} 还原设置吗？",
+    "delete": "确定要删除备份 {{fileName}} 吗？"
+  },
+  "advanced": {
+    "title": "高级设置",
+    "description": "此区域预留给未来的操作控制、恢复策略与系统防护。"
+  }
+}

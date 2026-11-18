@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   GetConfig,
   SaveConfig,
@@ -10,6 +11,7 @@ import {
 } from '../../wailsjs/go/main/App';
 
 function GeneralSettingsPage() {
+  const { t, i18n } = useTranslation();
   const [config, setConfig] = useState(null);
   const [backupFiles, setBackupFiles] = useState([]);
   const [status, setStatus] = useState('');
@@ -19,13 +21,19 @@ function GeneralSettingsPage() {
   const loadConfig = async () => {
     try {
       const result = await GetConfig();
-      setConfig(result || {
+      const nextConfig = result || {
         application: { language: 'zh-TW', theme: 'light' },
         backup: { enabled: true, intervalMinutes: 60, folder: '', keepCount: 5, lastBackup: null }
-      });
+      };
+      setConfig(nextConfig);
+
+      const savedLanguage = nextConfig.application?.language;
+      if (savedLanguage === 'zh-TW' || savedLanguage === 'en') {
+        i18n.changeLanguage(savedLanguage);
+      }
     } catch (error) {
       console.error('Failed to load settings:', error);
-      setStatus('載入設定失敗');
+      setStatus(t('status.loadFailed'));
     }
   };
 
@@ -56,7 +64,7 @@ function GeneralSettingsPage() {
 
   const handleChooseFolder = async () => {
     if (!window.showDirectoryPicker) {
-      setStatus('此環境不支援選擇資料夾，請手動輸入路徑');
+      setStatus(t('status.folderPickerUnavailable'));
       return;
     }
 
@@ -64,12 +72,12 @@ function GeneralSettingsPage() {
       const directoryHandle = await window.showDirectoryPicker();
       const selectedPath = directoryHandle.name || directoryHandle.kind;
       updateBackupField('folder', selectedPath);
-      setStatus(`已選擇資料夾：${selectedPath}`);
+      setStatus(`${t('status.folderSelected')}${selectedPath}`);
     } catch (error) {
       if (error && error.name !== 'AbortError') {
         console.error('Directory picker failed:', error);
       }
-      setStatus('未選擇資料夾');
+      setStatus(t('status.folderNotSelected'));
     }
   };
 
@@ -77,11 +85,14 @@ function GeneralSettingsPage() {
     try {
       setIsSaving(true);
       await SaveConfig(config);
-      setStatus('設定已保存');
+      if (config.application?.language) {
+        await i18n.changeLanguage(config.application.language);
+      }
+      setStatus(t('status.saved'));
       await loadBackups();
     } catch (error) {
       console.error('Failed to save config:', error);
-      setStatus('儲存失敗');
+      setStatus(t('status.saveFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -91,59 +102,59 @@ function GeneralSettingsPage() {
     try {
       setIsBackingUp(true);
       const result = await RunManualBackup();
-      setStatus(result && result.success ? `備份成功：${result.filePath}` : `備份失敗：${result?.message || '未知錯誤'}`);
+      setStatus(result && result.success ? `${t('status.backupSuccess')}${result.filePath}` : `${t('status.backupFailed')}${result?.message || t('status.unknownError')}`);
       const nextConfig = await GetConfig();
       setConfig(nextConfig);
       await loadBackups();
     } catch (error) {
       console.error('Failed to run backup:', error);
-      setStatus('手動備份失敗');
+      setStatus(t('status.backupFailedAction'));
     } finally {
       setIsBackingUp(false);
     }
   };
 
   const handleRestore = async (fileName) => {
-    const confirmed = window.confirm(`確定要從 ${fileName} 還原設定嗎？`);
+    const confirmed = window.confirm(t('confirm.restore', { fileName }));
     if (!confirmed) return;
 
     try {
       await RestoreBackup(fileName);
       const nextConfig = await GetConfig();
       setConfig(nextConfig);
-      setStatus(`已從 ${fileName} 還原設定`);
+      setStatus(t('status.restored', { fileName }));
     } catch (error) {
       console.error('Failed to restore backup:', error);
-      setStatus('還原失敗');
+      setStatus(t('status.restoreFailed'));
     }
   };
 
   const handleDelete = async (fileName) => {
-    const confirmed = window.confirm(`確定要刪除備份 ${fileName} 嗎？`);
+    const confirmed = window.confirm(t('confirm.delete', { fileName }));
     if (!confirmed) return;
 
     try {
       await DeleteBackup(fileName);
       await loadBackups();
-      setStatus(`已刪除 ${fileName}`);
+      setStatus(t('status.deleted', { fileName }));
     } catch (error) {
       console.error('Failed to delete backup:', error);
-      setStatus('刪除失敗');
+      setStatus(t('status.deleteFailed'));
     }
   };
 
   const handleOpenFolder = async () => {
     try {
       const folder = await OpenBackupDir();
-      setStatus(`備份資料夾：${folder}`);
+      setStatus(`${t('status.backupFolder')}${folder}`);
     } catch (error) {
       console.error('Failed to open backup dir:', error);
-      setStatus('開啟資料夾失敗');
+      setStatus(t('status.openFolderFailed'));
     }
   };
 
   if (!config) {
-    return <div className="mx-auto max-w-4xl p-8 text-slate-600">Loading...</div>;
+    return <div className="mx-auto max-w-4xl p-8 text-slate-600">{t('common.loading')}</div>;
   }
 
   return (
@@ -151,8 +162,8 @@ function GeneralSettingsPage() {
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-5 flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-800">Backup settings</h2>
-            <p className="mt-1 text-sm text-slate-500">Protect your configuration with scheduled, versioned backups.</p>
+            <h2 className="text-2xl font-semibold text-slate-800">{t('backup.title')}</h2>
+            <p className="mt-1 text-sm text-slate-500">{t('backup.subtitle')}</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -160,7 +171,7 @@ function GeneralSettingsPage() {
               onClick={handleOpenFolder}
               className="rounded-lg bg-slate-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-500"
             >
-              Open folder
+              {t('actions.openFolder')}
             </button>
             <button
               type="button"
@@ -168,7 +179,7 @@ function GeneralSettingsPage() {
               disabled={isBackingUp}
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-blue-300"
             >
-              {isBackingUp ? 'Backing up...' : 'Backup now'}
+              {isBackingUp ? t('actions.backingUp') : t('actions.backupNow')}
             </button>
           </div>
         </div>
@@ -181,11 +192,11 @@ function GeneralSettingsPage() {
               onChange={(e) => updateBackupField('enabled', e.target.checked)}
               className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
             />
-            <span className="font-medium text-slate-700">Enable scheduled backups</span>
+            <span className="font-medium text-slate-700">{t('backup.enable')}</span>
           </label>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Interval (minutes)</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">{t('backup.intervalLabel')}</label>
             <input
               type="number"
               min="5"
@@ -196,7 +207,7 @@ function GeneralSettingsPage() {
           </div>
 
           <div className="md:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-slate-700">Backup folder</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">{t('backup.folderLabel')}</label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -209,13 +220,13 @@ function GeneralSettingsPage() {
                 onClick={handleChooseFolder}
                 className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-500 hover:text-blue-600"
               >
-                Browse
+                {t('actions.browse')}
               </button>
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Keep backup count</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">{t('backup.keepCountLabel')}</label>
             <input
               type="number"
               min="1"
@@ -226,9 +237,9 @@ function GeneralSettingsPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Last backup</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">{t('backup.lastBackupLabel')}</label>
             <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-slate-600">
-              {config.backup?.lastBackup ? new Date(config.backup.lastBackup).toLocaleString() : 'No backup yet'}
+              {config.backup?.lastBackup ? new Date(config.backup.lastBackup).toLocaleString() : t('backup.noBackup')}
             </div>
           </div>
         </div>
@@ -241,15 +252,15 @@ function GeneralSettingsPage() {
             disabled={isSaving}
             className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
-            {isSaving ? 'Saving...' : 'Save settings'}
+            {isSaving ? t('actions.saving') : t('actions.save')}
           </button>
         </div>
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="mb-4 text-xl font-semibold text-slate-800">Backup history</h3>
+        <h3 className="mb-4 text-xl font-semibold text-slate-800">{t('backup.history')}</h3>
         {backupFiles.length === 0 ? (
-          <p className="text-sm text-slate-500">No backup history yet.</p>
+          <p className="text-sm text-slate-500">{t('backup.historyEmpty')}</p>
         ) : (
           <div className="space-y-3">
             {backupFiles.map((item) => (
@@ -266,14 +277,14 @@ function GeneralSettingsPage() {
                     onClick={() => handleRestore(item.name)}
                     className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm text-white transition hover:bg-emerald-500"
                   >
-                    Restore
+                    {t('actions.restore')}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(item.name)}
                     className="rounded-md bg-red-600 px-3 py-1.5 text-sm text-white transition hover:bg-red-500"
                   >
-                    Delete
+                    {t('actions.delete')}
                   </button>
                 </div>
               </div>
@@ -286,13 +297,13 @@ function GeneralSettingsPage() {
 }
 
 function AdvancedSettingsPage() {
+  const { t } = useTranslation();
+
   return (
     <div className="mx-auto max-w-4xl">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-800">Advanced settings</h2>
-        <p className="mt-2 text-sm text-slate-500">
-          This section is reserved for future operational controls, recovery policies, and system safeguards.
-        </p>
+        <h2 className="text-xl font-semibold text-slate-800">{t('advanced.title')}</h2>
+        <p className="mt-2 text-sm text-slate-500">{t('advanced.description')}</p>
       </div>
     </div>
   );
